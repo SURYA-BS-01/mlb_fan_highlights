@@ -138,10 +138,15 @@ def generate_text(prompt):
     return text
 
 def reformat_text(text):
-    text = re.sub(r"\*.*?\*", "", text)  # Remove asterisks
-    # text = re.sub(r"http\S+", "", text)  # Remove URLs
-    text = text.strip()
-    return text
+    match = re.search(r"{.*}", text, re.DOTALL)
+    if match:
+        extracted_json = match.group(0)  # Extract the JSON content
+        extracted_json.strip()  # Strip any extra whitespace
+    else:
+        return None
+    extracted_json = re.sub(r"\*.*?\*", "", extracted_json)  # Remove asterisks
+    extracted_json = extracted_json.strip()
+    return extracted_json
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -196,8 +201,8 @@ async def generate(request: Request, language: str = Form("ENGLISH")):
 
     # Generate content prompt
     prompt = f"""
-GENERATE THE CONTENT IN LANGUAGE: {language}, MAKE IT SOUND LIKE A NATIVE SPEAKER.
-OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT, DON'T GENERATE ANY EXTRA CHARACTERS OTHER THAN THE JSON:
+GENERATE THE CONTENT MUST IN LANGUAGE: {language}, MAKE IT SOUND LIKE A NATIVE SPEAKER.
+OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT WITHOUT ANY EXTRA SPACES AND LINES, DON'T GENERATE ANY EXTRA CHARACTERS OTHER THAN THE JSON. THE CONTENT MUST BE IN THE MENTIONED LANGUAGE.
 {{
   "title": "<Title of the article>",
   "sections": [
@@ -207,7 +212,14 @@ OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT, DON'T GENERATE ANY EXTRA CHARACT
     }},
     {{
       "heading": "Game Highlights",
-      "content": "<Details about key moments in the game>"
+      "content": "<Details about key moments in the game.
+      Things to keep in mind:
+    No links here.
+    Pacing Adjustments: Smooth transitions between key moments would help the narrative flow better.
+    Clarify Descriptions: Add more detail to specific plays for better understanding, like how runners scored.
+    Avoid Repetition: Use varied language to prevent overuse of phrases like “answered back.”
+    Strengthen Key Player Explanations: Provide more context on how each key player's actions impacted the game.
+    Grammar Refinements: Small tweaks in punctuation and phrasing could improve clarity and tighten the writing.>"
     }},
     {{
       "heading": "Key Players",
@@ -216,7 +228,8 @@ OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT, DON'T GENERATE ANY EXTRA CHARACT
   ],
   "links": [
     "<Link to the first highlight video>",
-    "<Link to the second highlight video>"
+    "<Link to the second highlight video>",
+    <and etc. all other links like this>
   ],
   "conclusion": "<Closing statement or call to action>"
 }}
@@ -237,12 +250,9 @@ Video Integration: Seamlessly reference links to video highlights, encouraging f
 Engagement Style:
 Use vivid language to bring the game to life (e.g., "a rocket of a home run," "an electrifying double play").
 Balance factual recaps with creative commentary to make the highlights more immersive.
-Length: Aim for a concise summary of about 500-600 words that emphasizes storytelling while remaining informative.
+Length: Aim for a concise summary of about 800-1000 words that emphasizes storytelling while remaining informative.
 The goal is to create a summary that feels like a conversation among fans, celebrating the thrill of the game and leaving them eager for the next update!"""
-    
-    raw_text = generate_text(prompt)
-    print("RAW GENERATED TEXT:", raw_text)  # Debugging purposes
-
+ 
     # Parse and return JSON directly
     try:
         raw_text = generate_text(prompt)
