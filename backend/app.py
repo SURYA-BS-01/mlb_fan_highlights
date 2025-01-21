@@ -252,7 +252,7 @@ Use vivid language to bring the game to life (e.g., "a rocket of a home run," "a
 Balance factual recaps with creative commentary to make the highlights more immersive.
 Length: Aim for a concise summary of about 800-1000 words that emphasizes storytelling while remaining informative.
 The goal is to create a summary that feels like a conversation among fans, celebrating the thrill of the game and leaving them eager for the next update!"""
- 
+
     # Parse and return JSON directly
     try:
         raw_text = generate_text(prompt)
