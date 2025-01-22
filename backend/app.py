@@ -98,16 +98,50 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from data_ingestion import DataIngestion
-from generate_content import generate_content
+
+from .data_ingestion import DataIngestion
+from .generate_content import generate_content
+from .routers import user, auth
+
 from google import genai
 from dotenv import load_dotenv
 import os
 import json
 import re
+import time
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+from . import models
+from .models import *
+from .database import engine, sessionLocal
 
 # Initialize FastAPI app
 app = FastAPI()
+
+models.Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = sessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+
+while True:
+    try:
+        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='alpha1234', cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print("Database connection was successfull")
+        break
+    except Exception as error:
+        print("Database connection failed")
+        print("Error: ", error)
+        time.sleep(2)
 
 app.add_middleware(
     CORSMiddleware,
@@ -117,10 +151,11 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+app.include_router(user.router)
+app.include_router(auth.router)
 
 # Setup templates directory for HTML rendering
 templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Load environment variables
 load_dotenv()

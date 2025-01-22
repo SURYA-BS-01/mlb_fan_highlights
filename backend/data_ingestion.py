@@ -1,4 +1,4 @@
-from utils import load_newline_delimited_json, process_endpoint_url
+from .utils import load_newline_delimited_json, process_endpoint_url
 import pandas as pd
 import json
 import requests
