@@ -19,18 +19,21 @@ const Article = ({ article }) => {
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-2 text-gray-800">Highlights Video Links:</h3>
         <ul className="list-disc pl-5">
-          {article.links.map((link, index) => (
-            <li key={index}>
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                {link}
-              </a>
-            </li>
-          ))}
+        {article.links.map((link, index) => (
+  Object.entries(link).map(([title, url], subIndex) => (
+    <li key={`${index}-${subIndex}`}>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:underline"
+      >
+        {title}
+      </a>
+    </li>
+  ))
+))}
+
         </ul>
       </div>
 

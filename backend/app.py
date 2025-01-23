@@ -228,7 +228,10 @@ async def home(request: Request):
 
 
 @app.post("/generate")
-async def generate(request: Request, language: str = Form("ENGLISH")):
+async def generate(request: Request):
+    
+    body = await request.json()
+    language = body.get("language", "ENGLISH")
     # Data ingestion and summary generation
     data_ingestion = DataIngestion()
     game_data = data_ingestion.initiate_data_ingestion()
@@ -262,9 +265,10 @@ OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT WITHOUT ANY EXTRA SPACES AND LINE
     }}
   ],
   "links": [
-    "<Link to the first highlight video>",
-    "<Link to the second highlight video>",
-    <and etc. all other links like this>
+    {{"link title 1":"<Link to the first highlight video>",
+    "link title 2":"<Link to the second highlight video>",
+    etc...
+    }}
   ],
   "conclusion": "<Closing statement or call to action>"
 }}
@@ -300,13 +304,13 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         # Reformat and parse JSON
         formatted_text = reformat_text(raw_text)
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
-            print("Invalid JSON structure:", formatted_text)
+            # print("Invalid JSON structure:", formatted_text)
             return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)
         
         parsed_json = json.loads(formatted_text)
     except json.JSONDecodeError as e:
         print(f"JSONDecodeError: {e}")
-        print("Formatted Text Causing Error:", formatted_text)
+        # print("Formatted Text Causing Error:", formatted_text)
         return JSONResponse(content={"error": "Failed to parse generated content."}, status_code=500)
     except Exception as e:
         print("Error during text generation:", e)

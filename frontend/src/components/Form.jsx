@@ -101,12 +101,13 @@
 
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Form = ({ setArticle }) => {
   const [language, setLanguage] = useState("ENGLISH");
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -115,6 +116,7 @@ const Form = ({ setArticle }) => {
         language,
       });
       setArticle(response.data); // Pass the structured content to the parent
+      navigate("/article");
     } catch (error) {
       console.error("Error generating article:", error);
       alert("Failed to generate content. Please try again.");
