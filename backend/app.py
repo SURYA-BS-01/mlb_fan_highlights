@@ -1,107 +1,12 @@
-# from data_ingestion import DataIngestion
-# from generate_content import generate_content
-# import google.generativeai as genai
-# from dotenv import load_dotenv
-# import os
-
-# data_ingestion = DataIngestion()
-# game_data = data_ingestion.initiate_data_ingestion()
-
-# summary = generate_content(game_data)
-
-# load_dotenv()
-
-# API_KEY = os.getenv("API_KEY")
-
-# genai.configure(api_key=API_KEY)
-# model = genai.GenerativeModel("gemini-2.0-flash-thinking-exp-1219")
-
-# topic = "Summarizing the game highlights and details for a sports audience."
-# loops = int(input("No of reasoning loops? "))
-
-# setup_prompt = f"""You are tasked with writing a game highlights and summary for a baseball match to send it to the user the day after the match. 
-# Here’s the data you will use: 
-# It consists of the information related to a baseball game.
-# {summary}
-
-
-# Your task is to generate a detailed framework on how to analyze and summarize this data for a sports audience. 
-# This framework should explain:
-# 1. **What aspects of the game are most important to include?** 
-# (e.g., scoring highlights, standout plays, player contributions, home runs, doubles, game-changing events, ).
-# 2. **How should the information be structured?** (e.g., narrative format, bullet points, key takeaways, outstanding hits, pitching,errors, fielding plays, etc.).
-# 3. **What angles should be considered to give a well-rounded summary?** (e.g., team strategy, individual performances, pivotal moments).
-# 4. Any additional context (e.g., weather, venue)
-
-# Write this framework as a set of generic instructions that encourages thorough analysis and structured thinking.
-# """
-# first_response = model.generate_content(setup_prompt,
-#     stream=True,
-#     generation_config=genai.types.GenerationConfig(
-#         temperature=0.3
-#     ))
-
-# print("\nFormulating Question:")
-
-# question = ""
-# for chunk in first_response:
-#     question += chunk.text
-#     print(chunk.text)
-# print("\n"+ "_" * 80)
-
-# current_thought = question
-# all_thoughts = []
-# for i in range(loops):
-#     print(f"\nReasoning Loop {i+1}/{loops}:")
-
-#     reasoning_prompt = f"""HERE"S WHAT YOU NEED TO DO: #### {current_thought} ###
-#     Provide a detailed, thoughtful analysis as if you were a sports commentator breaking down this play for an audience."""
-
-#     response = model.generate_content(reasoning_prompt,
-#         stream=True,
-#         generation_config=genai.types.GenerationConfig(
-#         temperature=1.0
-#     ))
-
-#     current_thought = ""
-#     for chunk in response:
-#         current_thought += chunk.text
-#         print(chunk.text)
-#     all_thoughts.append(current_thought)
-#     print("\n"+ "_" * 80)
-
-
-# # Third agent
-
-# print("\nFinal Synthesis:")
-# synthesis_prompt = f"""Topic: {topic}"
-# Initial Framework: {question}
-# Reasoning Chain: {' | '.join(all_thoughts)}
-
-# IMPORTANT: Your task is to synthesize these insights into a clear and engaging summary. 
-# 1. Write in an article-like format, with a logical flow and structured narrative.
-# 2. Highlight the most critical game events, player performances, and team strategies.
-# 3. Ensure the language is engaging and suitable for a general sports audience."""
-
-# final_response = model.generate_content(synthesis_prompt,
-#     stream=True,
-#     generation_config=genai.types.GenerationConfig(
-#         temperature=0.1
-#     ))
-# for chunk in final_response:
-#     print(chunk.text)
-# print("\n"+ "_" * 80)
-
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from .data_ingestion import DataIngestion
 from .generate_content import generate_content
-from .routers import user, auth
+from .routers import user, auth, article
 
 from google import genai
 from dotenv import load_dotenv
@@ -115,7 +20,7 @@ from psycopg2.extras import RealDictCursor
 
 from . import models
 from .models import *
-from .database import engine, sessionLocal
+from .database import engine, sessionLocal, collection
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -129,7 +34,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 
 
 while True:
@@ -153,6 +57,7 @@ app.add_middleware(
 
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(article.router)
 
 # Setup templates directory for HTML rendering
 templates = Jinja2Templates(directory="templates")
@@ -265,8 +170,8 @@ OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT WITHOUT ANY EXTRA SPACES AND LINE
     }}
   ],
   "links": [
-    {{"link title 1":"<Link to the first highlight video>",
-    "link title 2":"<Link to the second highlight video>",
+    {{"<link title 1>":"<Link to the first highlight video>",
+    "<link title 2>":"<Link to the second highlight video>",
     etc...
     }}
   ],
@@ -295,7 +200,8 @@ The goal is to create a summary that feels like a conversation among fans, celeb
     # Parse and return JSON directly
     try:
         raw_text = generate_text(prompt)
-        print("Raw Text Before Reformatting:", raw_text)  # Debugging purposes
+
+        # print("Raw Text Before Reformatting:", raw_text)  # Debugging purposes
 
         # Check if text is empty
         if not raw_text.strip():
@@ -303,6 +209,9 @@ The goal is to create a summary that feels like a conversation among fans, celeb
 
         # Reformat and parse JSON
         formatted_text = reformat_text(raw_text)
+        json_data = json.loads(formatted_text)
+        collection.insert_one(json_data)
+        print(type(json_data))
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
             # print("Invalid JSON structure:", formatted_text)
             return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)

@@ -138,6 +138,7 @@ const Form = ({ setArticle }) => {
       >
         <option value="ENGLISH">English</option>
         <option value="SPANISH">Spanish</option>
+        <option value="JAPANESE">Japanese</option>
         {/* Add more languages as needed */}
       </select>
       <button

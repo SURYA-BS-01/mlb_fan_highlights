@@ -1,16 +1,1 @@
-pandas
-numpy
-requests
-jsons
-google-cloud
-matplotlib
-seaborn
-IPython
-google-generativeai
-python-dotenv
-google-genai
-google-cloud
-gTTS
-google-cloud-texttospeech
-transformers
-tiktoken
+SQLAlchemy

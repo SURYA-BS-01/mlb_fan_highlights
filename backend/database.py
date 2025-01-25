@@ -16,3 +16,20 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = "mongodb+srv://suryabs:alpha1234@mlbarticles.ndsr0.mongodb.net/?retryWrites=true&w=majority&appName=MlbArticles"
+
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+
+db = client.mlb_articles
+collection = db['articles']
+
+
+

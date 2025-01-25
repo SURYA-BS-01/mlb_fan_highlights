@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -24,3 +24,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[int]
+
+class ArticleInOut(BaseModel):
+    title: str
+    sections: List[Dict[str, str]]  # Same as the Article model
+    links: List[Dict[str, str]]  # Same as the Article model
+    conclusion: str
