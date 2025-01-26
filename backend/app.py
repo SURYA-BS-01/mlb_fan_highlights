@@ -5,8 +5,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 from .data_ingestion import DataIngestion
-from .generate_content import generate_content
-from .routers import user, auth, article
+from .routers import user, auth, article, generate
+from .routers import generate
 
 from google import genai
 from dotenv import load_dotenv
@@ -58,171 +58,107 @@ app.add_middleware(
 app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(article.router)
+app.include_router(generate.router)
+
 
 # Setup templates directory for HTML rendering
 templates = Jinja2Templates(directory="templates")
 
-# Load environment variables
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
-
-def generate_text(prompt):
-    client = genai.Client(api_key=API_KEY, http_options={'api_version': 'v1alpha'})
-    text = ""
-    for chunk in client.models.generate_content_stream(
-        model='gemini-2.0-flash-thinking-exp', contents=prompt
-    ):
-        for part in chunk.candidates[0].content.parts:
-            if not part.thought:
-                text += part.text
-    return text
-
-def reformat_text(text):
-    match = re.search(r"{.*}", text, re.DOTALL)
-    if match:
-        extracted_json = match.group(0)  # Extract the JSON content
-        extracted_json.strip()  # Strip any extra whitespace
-    else:
-        return None
-    extracted_json = re.sub(r"\*.*?\*", "", extracted_json)  # Remove asterisks
-    extracted_json = extracted_json.strip()
-    return extracted_json
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# @app.post("/generate", response_class=HTMLResponse)
-# async def generate(request: Request, language: str = Form("ENGLISH")):
-#     # Data ingestion and summary generation
-#     data_ingestion = DataIngestion()
-#     game_data = data_ingestion.initiate_data_ingestion()
-#     summary = generate_content(game_data)
 
-#     # Generate content prompt
-#     prompt = f"""
-# GENERATE THE CONTENT IN LANGUAGE: {language}, MAKE IT SOUND LIKE A NATIVE SPEAKER
-# "Using the provided baseball game data, craft an engaging and dynamic highlight summary designed for fans to stay updated on the latest action.
-# Game data:{summary}
-# Requirements:
-# Tone: Energetic, conversational, and exciting to draw in readers and keep them engaged.
-# Content Focus:
-# Summarize the game’s key moments, focusing on pivotal scoring plays, standout performances, and game-changing events.
-# Highlight any exceptional plays, like home runs, doubles, defensive gems, or clutch pitching moments.
-# Structure:
-# Opening: Set the scene with details about the matchup, venue, and overall atmosphere (e.g., weather or crowd energy).
-# Game Highlights: Present a chronological or thematic breakdown of the game’s key moments.
-# Player Spotlights: Feature individual standout performances or memorable contributions.
-# Engagement: Encourage fans to stay tuned for more updates or share their thoughts.
-# Video Integration: Seamlessly reference links to video highlights, encouraging fans to relive the excitement.
-# Engagement Style:
-# Use vivid language to bring the game to life (e.g., "a rocket of a home run," "an electrifying double play").
-# Balance factual recaps with creative commentary to make the highlights more immersive.
-# Length: Aim for a concise summary of about 500-600 words that emphasizes storytelling while remaining informative.
-# The goal is to create a summary that feels like a conversation among fans, celebrating the thrill of the game and leaving them eager for the next update!"
-
-# Structure the article into Introduction, Game Highlights, key players and conclusion
-
-# put the highlights video link before the end.
-# """
-#     raw_text = generate_text(prompt)
-#     print(raw_text)
-#     formatted_text = reformat_text(raw_text)
-
-#     return JSONResponse(content={"content": formatted_text})
-
-
-@app.post("/generate")
-async def generate(request: Request):
-    
-    body = await request.json()
-    language = body.get("language", "ENGLISH")
-    # Data ingestion and summary generation
-    data_ingestion = DataIngestion()
-    game_data = data_ingestion.initiate_data_ingestion()
-    summary = generate_content(game_data)
-
-    # Generate content prompt
-    prompt = f"""
-GENERATE THE CONTENT MUST IN LANGUAGE: {language}, MAKE IT SOUND LIKE A NATIVE SPEAKER.
-OUTPUT THE RESULT STRICTLY IN THIS JSON FORMAT WITHOUT ANY EXTRA SPACES AND LINES, DON'T GENERATE ANY EXTRA CHARACTERS OTHER THAN THE JSON. THE CONTENT MUST BE IN THE MENTIONED LANGUAGE.
-{{
-  "title": "<Title of the article>",
+data = {
+  "title": "New Test Data",       
   "sections": [
-    {{
+    {
       "heading": "Introduction",
-      "content": "<Introduction content>"
-    }},
-    {{
+      "content": "Under clear skies and a comfortable 71 degrees at Angel Stadium, the Texas Rangers and Los Angeles Angels clashed in a game that was anything but a pitcher's duel.  With a gentle breeze blowing from right to left, conditions were ripe for offense, and both teams delivered in a back-and-forth battle that kept fans on the edge of their seats until the final out.  Get ready for a wild ride as we break down all the key moments from this high-scoring showdown!"
+    },
+    {
       "heading": "Game Highlights",
-      "content": "<Details about key moments in the game.
-      Things to keep in mind:
-    No links here.
-    Pacing Adjustments: Smooth transitions between key moments would help the narrative flow better.
-    Clarify Descriptions: Add more detail to specific plays for better understanding, like how runners scored.
-    Avoid Repetition: Use varied language to prevent overuse of phrases like “answered back.”
-    Strengthen Key Player Explanations: Provide more context on how each key player's actions impacted the game.
-    Grammar Refinements: Small tweaks in punctuation and phrasing could improve clarity and tighten the writing.>"
-    }},
-    {{
+      "content": "The scoring kicked off in the top of the 2nd when Nathaniel Lowe blasted a solo home run to right-center field, putting the Rangers ahead early.  However, the Angels responded immediately in the bottom half of the inning.  Logan O'Hoppe started things off with a single, and Niko Kavadas followed with another single, putting runners on first and second. Michael Stefanic then ripped a line drive that bounced into the stands for a ground-rule double, scoring O'Hoppe and advancing Kavadas to third.  Taylor Ward then grounded out to shortstop, but it was enough to bring Kavadas home, tying the game.  Jack López capped off the inning with a ground ball single to third, scoring Stefanic and giving the Angels a 3-1 lead.  But the see-saw battle continued!  In the bottom of the 3rd, after Brandon Drury singled and O'Hoppe singled again, Gustavo Campero launched a three-run homer to left field, reclaiming the lead for the Angels and making it 6-1 after Kavadas followed up with a solo shot to center field.  The Rangers chipped away in the top of the 4th. Adolis García singled and advanced to second on a fielding error.  Nathaniel Lowe singled, moving García to third, and Leody Taveras walked to load the bases.  Carson Kelly then grounded into a double play, but García scored on the play, narrowing the Angels' lead.  Wyatt Langford then stepped up in the top of the 6th and hammered a solo homer to left-center, bringing the Rangers within one run.  The Angels extended their lead again in the bottom of the 6th in a messy play.  Niko Kavadas and Michael Stefanic walked, and Taylor Ward singled to load the bases.  Eric Wagaman then hit a fielder's choice to shortstop, where a fielding error by Josh Smith allowed Kavadas to score, pushing the Angels' lead to two.  The Rangers mounted a late-game rally in the 8th. Matt Duffy singled, and Nathaniel Lowe doubled sharply to center, scoring Duffy and cutting the deficit to one.  Jonah Heim then followed with a triple to right field, scoring Lowe and tying the game!  The drama peaked in the top of the 9th.  Marcus Semien walked, Wyatt Langford walked, and Matt Duffy was hit by a pitch to load the bases.  Nathaniel Lowe then walked, forcing in Semien and giving the Rangers the lead.  Jonathan Ornelas then delivered a bases-clearing single to right field, scoring Langford, Duffy, and Lowe, and reaching second himself on a throwing error.  This explosive play extended the Rangers' lead to four runs, effectively sealing the game despite a scoreless bottom of the 9th for the Angels.  What a rollercoaster of a game!"
+    },
+    {
       "heading": "Key Players",
-      "content": "<Details about standout players>"
-    }}
+      "content": "Nathaniel Lowe was undoubtedly the offensive star for the Rangers, racking up multiple hits, including a home run and a double, and driving in crucial runs throughout the game. Wyatt Langford also contributed significantly with a powerful solo home run. For the Angels, Gustavo Campero and Niko Kavadas provided the power, each launching home runs and driving in multiple runs.  Michael Stefanic was a spark plug for the Angels' offense, reaching base multiple times and scoring a run.  Despite the loss, these players delivered standout performances in a game filled with offensive fireworks."
+    }
   ],
   "links": [
-    {{"<link title 1>":"<Link to the first highlight video>",
-    "<link title 2>":"<Link to the second highlight video>",
-    etc...
-    }}
+    {
+      "Lowe's Lead-Off Homer":"https://www.mlb.com/video/search?q=playid=\"31b683f3-ef2b-41bb-956a-8986bf3bf7fd\""
+    },
+    {
+      "Stefanic's Ground-Rule Double":"https://www.mlb.com/video/search?q=playid=\"df17ed2e-c97d-4c0c-80b8-9e950e35bc48\""
+    },
+    {
+      "Ward's RBI Groundout":"https://www.mlb.com/video/search?q=playid=\"d1b3fceb-defe-43b3-ba06-b3508099658d\""
+    },
+    {
+      "López's RBI Single":"https://www.mlb.com/video/search?q=playid=\"c5ab9947-082a-43cc-afa9-ea18d619cede\""
+    },
+    {
+      "Campero's Three-Run Blast":"https://www.mlb.com/video/search?q=playid=\"1c79b820-922c-4205-b8d7-e8da3710dbc4\""
+    },
+    {
+      "Kavadas' Solo Homer":"https://www.mlb.com/video/search?q=playid=\"8ab3aec7-8936-49fe-9a58-c869f8a15523\""
+    },
+    {
+      "Kelly's RBI Double Play":"https://www.mlb.com/video/search?q=playid=\"b75e5a9f-eba2-48b5-8644-6fbaf7223614\""
+    },
+    {
+      "Langford's Solo Shot":"https://www.mlb.com/video/search?q=playid=\"172c0eed-b6af-490d-a0b4-7e76e30cd49c\""
+    },
+    {
+      "Wagaman's Fielder's Choice & Error":"https://www.mlb.com/video/search?q=playid=\"efbd2be3-1371-45b6-bbfa-167a3f3db9ff\""
+    },
+    {
+      "Lowe's RBI Double in the 8th":"https://www.mlb.com/video/search?q=playid=\"d2672f64-28ce-4601-9945-f74fea571ffb\""
+    },
+    {
+      "Heim's Game-Tying Triple":"https://www.mlb.com/video/search?q=playid=\"6851abbd-4248-4624-9a58-c869f8a15523\""
+    },
+    {
+      "Lowe's Go-Ahead Walk":"https://www.mlb.com/video/search?q=playid=\"c3c2ed47-05dc-4d41-8cc5-a677fadedaef\""
+    },
+    {
+      "Ornelas' Bases-Clearing Single":"https://www.mlb.com/video/search?q=playid=\"a7d97457-b1d1-4dc8-b7f9-ab53a364daa6\""
+    }
   ],
-  "conclusion": "<Closing statement or call to action>"
-}}
+  "conclusion": "What an incredible game of baseball!  From lead changes to clutch hits and late-inning drama, this Rangers vs. Angels matchup had it all.  Make sure to check out the video highlights to relive all the best moments, and let us know in the comments which play was your favorite!  Until next time, baseball fans!" 
+}
 
-Game data: {summary}
 
-Requirements:
-Tone: Energetic, conversational, and exciting to draw in readers and keep them engaged.
-Content Focus:
-Summarize the game’s key moments, focusing on pivotal scoring plays, standout performances, and game-changing events.
-Highlight any exceptional plays, like home runs, doubles, defensive gems, or clutch pitching moments.
-Structure:
-Opening: Set the scene with details about the matchup, venue, and overall atmosphere (e.g., weather or crowd energy).
-Game Highlights: Present a chronological or thematic breakdown of the game’s key moments.
-Player Spotlights: Feature individual standout performances or memorable contributions.
-Engagement: Encourage fans to stay tuned for more updates or share their thoughts.
-Video Integration: Seamlessly reference links to video highlights, encouraging fans to relive the excitement.
-Engagement Style:
-Use vivid language to bring the game to life (e.g., "a rocket of a home run," "an electrifying double play").
-Balance factual recaps with creative commentary to make the highlights more immersive.
-Length: Aim for a concise summary of about 800-1000 words that emphasizes storytelling while remaining informative.
-The goal is to create a summary that feels like a conversation among fans, celebrating the thrill of the game and leaving them eager for the next update!"""
+import asyncio
+import aiohttp
 
-    # Parse and return JSON directly
-    try:
-        raw_text = generate_text(prompt)
+async def fetch_schedule():
+    url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2024'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.json()
+            return data
 
-        # print("Raw Text Before Reformatting:", raw_text)  # Debugging purposes
+async def poll_schedule():
+    previous_data = await fetch_schedule()
+    while True:
+        schedule_data = await fetch_schedule()
+        schedule_data['new_data'] = data
+        if schedule_data != previous_data:
+            print("New updates detected!")
+            generate.generate_summary("JAPANESE")
+            
+            # Process the new schedule_data here
+            previous_data = schedule_data
+        await asyncio.sleep(12)  # Avoid blocking with  async sleep
 
-        # Check if text is empty
-        if not raw_text.strip():
-            return JSONResponse(content={"error": "No content generated by the AI model."}, status_code=500)
+@app.on_event("startup")
+async def startup_event():
+    # Schedule the polling task at startup
+    asyncio.create_task(poll_schedule())
 
-        # Reformat and parse JSON
-        formatted_text = reformat_text(raw_text)
-        json_data = json.loads(formatted_text)
-        collection.insert_one(json_data)
-        print(type(json_data))
-        if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
-            # print("Invalid JSON structure:", formatted_text)
-            return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)
-        
-        parsed_json = json.loads(formatted_text)
-    except json.JSONDecodeError as e:
-        print(f"JSONDecodeError: {e}")
-        # print("Formatted Text Causing Error:", formatted_text)
-        return JSONResponse(content={"error": "Failed to parse generated content."}, status_code=500)
-    except Exception as e:
-        print("Error during text generation:", e)
-        return JSONResponse(content={"error": "AI model failed to generate content."}, status_code=500)
-
-    return JSONResponse(content=parsed_json)
+@app.get("/")
+async def root():
+    return {"message": "MLB Fan Highlights Backend is running!"}

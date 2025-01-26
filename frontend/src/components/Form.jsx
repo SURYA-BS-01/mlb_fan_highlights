@@ -105,25 +105,34 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Form = ({ setArticle }) => {
+
   const [language, setLanguage] = useState("ENGLISH");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/generate", {
-        language,
-      });
-      setArticle(response.data); // Pass the structured content to the parent
-      navigate("/article");
-    } catch (error) {
-      console.error("Error generating article:", error);
-      alert("Failed to generate content. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setLoading(true);
+  const token = localStorage.getItem("token"); // Ensure the token is stored in local storage after login
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/generate",
+      { language },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setArticle(response.data); // Pass the structured content to the parent
+    navigate("/article");
+  } catch (error) {
+    console.error("Error generating article:", error);
+    alert("Failed to generate content. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded-md">

@@ -1,9 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException, status, Depends
-from ..models import Article
+from fastapi import APIRouter, HTTPException, status, Depends
 from ..schemas import ArticleIn, ArticleOut
 from .. import oauth
-from ..database import get_db, collection
-from pymongo.collection import Collection
+from ..database import collection
 from bson import ObjectId
 from typing import List, Dict
 from fastapi.responses import JSONResponse
@@ -44,6 +42,5 @@ async def get_article(id: str, current_user: int = Depends(oauth.get_current_use
         raise HTTPException(status_code=404, detail="Article not found")
 
     # Convert the ObjectId to a string
-    print(article)
     article['_id'] = str(article['_id'])
     return article  # Return dict directly instead of JSONResponse
