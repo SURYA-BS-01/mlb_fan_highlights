@@ -18,7 +18,7 @@ const AuthenticatedRoutes = ({ setArticle, article }) => (
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/form" element={<Form setArticle={setArticle} />} />
-    <Route path="/article" element={<Article article={article} />} />
+    <Route path="/article/:id" element={<Article/>} />
     <Route path="*" element={<Navigate to="/" />} />
   </Routes>
 );
