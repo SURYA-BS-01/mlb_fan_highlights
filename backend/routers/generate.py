@@ -131,6 +131,7 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         # Reformat and parse JSON
         formatted_text = reformat_text(raw_text)
         json_data = json.loads(formatted_text)
+        json_data['created_at'] = datetime.utcnow()
         collection.insert_one(json_data)
         print("Data Inserted")
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):

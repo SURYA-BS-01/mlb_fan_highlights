@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+    
 from typing import Optional, Dict, List
 from datetime import datetime
 from bson import ObjectId
@@ -30,6 +31,7 @@ class ArticleIn(BaseModel):
     sections: Optional[Dict[str, str]]  # Same as the Article model
     links: Optional[Dict[str, str]]  # Same as the Article model
     conclusion: str
+    created_at: Optional[datetime] = Field(default=None)
 
 class ArticleOut(BaseModel):
     _id: ObjectId

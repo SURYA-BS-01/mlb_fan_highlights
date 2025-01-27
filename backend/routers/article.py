@@ -17,7 +17,7 @@ router = APIRouter(
 async def create_task(new_article: ArticleIn, current_user: int = Depends(oauth.get_current_user)):
     
     # Insert the article into the MongoDB collection
-    new_article = {**new_article, "created_at": datetime.now(datetime.timezone.utc)}
+    # new_article['created_at'] = datetime.utcnow()
     resp = collection.insert_one(new_article)
     # Return the inserted article with an added `id`
     return {
@@ -36,10 +36,14 @@ from pymongo import DESCENDING
 @router.get("/latest", response_model=List[Dict])
 async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
-    # articles = collection.find().sort("created_at").limit(5)
     articles = list(collection.find().sort("_id", DESCENDING).limit(5))
     # Convert ObjectId to string for JSON serialization
-    articles = [{**article, "_id": str(article["_id"])} for article in articles]
+    # articles = [{**article, "_id": str(article["_id"])} for article in articles]
+    articles = [
+        {key: value for key, value in article.items() if key not in ("created_at",)}
+        | {"_id": str(article["_id"])}
+        for article in articles
+    ]
     return JSONResponse(content=articles)
 
 
@@ -56,5 +60,6 @@ async def get_article(id: str, current_user: int = Depends(oauth.get_current_use
         raise HTTPException(status_code=404, detail="Article not found")
 
     # Convert the ObjectId to a string
+    article = {key: value for key, value in article.items() if key not in ("created_at",)}
     article['_id'] = str(article['_id'])
     return article  # Return dict directly instead of JSONResponse
