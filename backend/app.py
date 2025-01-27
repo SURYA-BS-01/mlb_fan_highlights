@@ -42,7 +42,7 @@ while True:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # Add the React frontend URL
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://gqgm6k77-5173.inc1.devtunnels.ms"],  # Add the React frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers

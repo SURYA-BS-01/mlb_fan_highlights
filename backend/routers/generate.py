@@ -132,7 +132,7 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         formatted_text = reformat_text(raw_text)
         json_data = json.loads(formatted_text)
         collection.insert_one(json_data)
-        print(type(json_data))
+        print("Data Inserted")
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
             # print("Invalid JSON structure:", formatted_text)
             return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)

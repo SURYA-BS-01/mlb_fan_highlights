@@ -5,6 +5,7 @@ from ..database import collection
 from bson import ObjectId
 from typing import List, Dict
 from fastapi.responses import JSONResponse
+from datetime import datetime
 
 
 router = APIRouter(
@@ -16,7 +17,8 @@ router = APIRouter(
 async def create_task(new_article: ArticleIn, current_user: int = Depends(oauth.get_current_user)):
     
     # Insert the article into the MongoDB collection
-    resp = collection.insert_one(new_article.dict())
+    new_article = {**new_article, "created_at": datetime.now(datetime.timezone.utc)}
+    resp = collection.insert_one(new_article)
     # Return the inserted article with an added `id`
     return {
         **new_article.model_dump(),
@@ -28,6 +30,18 @@ async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
     articles = collection.find()
     articles = [{**article, "_id": str(article["_id"])} for article in articles]
     return JSONResponse(content=articles)   
+
+from pymongo import DESCENDING
+
+@router.get("/latest", response_model=List[Dict])
+async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
+    # Fetch the last 5 articles sorted by creation time in descending order
+    # articles = collection.find().sort("created_at").limit(5)
+    articles = list(collection.find().sort("_id", DESCENDING).limit(5))
+    # Convert ObjectId to string for JSON serialization
+    articles = [{**article, "_id": str(article["_id"])} for article in articles]
+    return JSONResponse(content=articles)
+
 
 
 @router.get("/{id}", response_model=ArticleOut)

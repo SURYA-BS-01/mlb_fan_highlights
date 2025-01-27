@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import Form from "./components/Form";
 import Article from "./components/Article";
+import FilteredArticles from "./components/FilteredArticles";
 
 const UnauthenticatedRoutes = ({ setIsAuthenticated }) => (
   <Routes>
@@ -19,6 +20,7 @@ const AuthenticatedRoutes = ({ setArticle, article }) => (
     <Route path="/" element={<Home />} />
     <Route path="/form" element={<Form setArticle={setArticle} />} />
     <Route path="/article/:id" element={<Article/>} />
+    <Route path="/article/filter" element={<FilteredArticles/>} />
     <Route path="*" element={<Navigate to="/" />} />
   </Routes>
 );
