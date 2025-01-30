@@ -173,45 +173,27 @@ const FilteredArticles = () => {
   const [filters, setFilters] = useState({ startDate: null, endDate: null, team: "" });
   const [teams, setTeams] = useState([]); // To dynamically fetch teams
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/teams", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch teams");
-        }
-        const data = await response.json();
-        setTeams(data);
-      } catch (error) {
-        console.error(error.message);
-      }
-    };
-
-    fetchTeams();
-  }, []);
 
   const fetchFilteredArticles = async () => {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams();
-      if (filters.startDate) queryParams.append("start_date", filters.startDate.toISOString().split("T")[0]);
-      if (filters.endDate) queryParams.append("end_date", filters.endDate.toISOString().split("T")[0]);
+      if (filters.startDate) queryParams.append("start_date", filters.startDate.toLocaleDateString("en-CA"));
+      if (filters.endDate) queryParams.append("end_date", filters.endDate.toLocaleDateString("en-CA"));
       if (filters.team) queryParams.append("team", filters.team);
-
+  
+      console.log("Query Params:", queryParams.toString());
+  
       const response = await fetch(`http://127.0.0.1:8000/article/filter?${queryParams.toString()}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch filtered articles");
       }
-
+  
       const data = await response.json();
       setArticles(data);
     } catch (error) {
@@ -220,6 +202,7 @@ const FilteredArticles = () => {
       setLoading(false);
     }
   };
+  
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));

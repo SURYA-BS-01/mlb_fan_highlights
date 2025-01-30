@@ -132,6 +132,15 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         formatted_text = reformat_text(raw_text)
         json_data = json.loads(formatted_text)
         json_data['created_at'] = datetime.utcnow()
+
+        iso_date = game_data["gameData"]["datetime"]["dateTime"]
+        date_obj = datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%SZ")  # Parse full datetime
+        date_only = date_obj.date()  # Extract only the date part
+        json_data['game_date'] = date_only.isoformat()
+
+
+        print(game_data)
+
         collection.insert_one(json_data)
         print("Data Inserted")
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
@@ -148,3 +157,4 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         return JSONResponse(content={"error": "AI model failed to generate content."}, status_code=500)
 
     return JSONResponse(content=parsed_json)
+
