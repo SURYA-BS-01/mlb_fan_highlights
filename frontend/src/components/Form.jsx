@@ -103,6 +103,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+// axios.post(`https://translation.googleapis.com/language/translate/v2?key=${process.env.GOOGLE_TRANSLATE_API_KEY}&q=Hello World&target=`)
 
 const Form = ({ setArticle }) => {
 

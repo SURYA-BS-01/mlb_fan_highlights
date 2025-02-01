@@ -276,7 +276,7 @@ const Home = () => {
                 Transform your gaming moments into captivating highlights with AI-powered analysis
               </p>
               <button
-                onClick={() => navigate("/form")}
+                onClick={() => navigate("/createarticle")}
                 className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <Plus className="w-5 h-5" />
@@ -321,38 +321,48 @@ const Home = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {articles.length > 0 ? (
-              articles.map((article, index) => (
-                <motion.div
-                  key={article._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  onClick={() => navigate(`/article/${article._id}`)}
-                  className="group relative bg-gray-800/50 rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 cursor-pointer border border-gray-700/50 hover:border-blue-500/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300"></div>
-                  <h2 className="text-xl font-semibold text-blue-400 mb-3 group-hover:text-blue-300 transition-colors duration-300">
-                    {article.title}
-                  </h2>
-                  <p className="text-gray-400 line-clamp-3 group-hover:text-gray-300 transition-colors duration-300">
-                    {article.sections[0]?.content}
-                  </p>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-20">
-                <p className="text-gray-400 text-lg mb-4">No highlights available yet</p>
-                <button
-                  onClick={() => navigate("/form")}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500/20 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all duration-300"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Create Your First Highlight</span>
-                </button>
-              </div>
-            )}
-          </div>
+  {articles.length > 0 ? (
+    articles.map((article, index) => (
+      <motion.div
+        key={article._id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.1 }}
+        onClick={() => navigate(`/article/${article._id}`)}
+        className="group relative bg-gray-800/50 rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 cursor-pointer border border-gray-700/50 hover:border-blue-500/50"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300"></div>
+
+        {/* Title */}
+        <h2 className="text-xl font-semibold text-blue-400 mb-3 group-hover:text-blue-300 transition-colors duration-300">
+          {article.title}
+        </h2>
+
+        {/* Date */}
+        <p className="text-gray-400 text-sm mb-2">
+          📅 {new Date(article.game_date).toLocaleDateString()}
+        </p>
+
+        {/* Teams */}
+        <p className="text-gray-400 text-sm">
+          🏟️ <span className="font-medium">{article.team_home}</span> vs <span className="font-medium">{article.team_away}</span>
+        </p>
+      </motion.div>
+    ))
+  ) : (
+    <div className="col-span-full text-center py-20">
+      <p className="text-gray-400 text-lg mb-4">No highlights available yet</p>
+      <button
+        onClick={() => navigate("/form")}
+        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500/20 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all duration-300"
+      >
+        <Plus className="w-5 h-5" />
+        <span>Create Your First Highlight</span>
+      </button>
+    </div>
+  )}
+</div>
+
         )}
       </div>
     </div>

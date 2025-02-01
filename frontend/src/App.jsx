@@ -65,6 +65,7 @@ import Home from "./components/Home";
 import Form from "./components/Form";
 import Article from "./components/Article";
 import FilteredArticles from "./components/FilteredArticles";
+import CreateArticle from "./components/CreateArticle";
 
 const UnauthenticatedRoutes = ({ setIsAuthenticated }) => (
   <Routes>
@@ -77,6 +78,7 @@ const UnauthenticatedRoutes = ({ setIsAuthenticated }) => (
 const AuthenticatedRoutes = ({ setArticle, article }) => (
   <Routes>
     <Route path="/" element={<Home />} />
+    <Route path="/createarticle" element={<CreateArticle />} />
     <Route path="/form" element={<Form setArticle={setArticle} />} />
     <Route path="/article/:id" element={<Article />} />
     <Route path="/article/filter" element={<FilteredArticles />} />
