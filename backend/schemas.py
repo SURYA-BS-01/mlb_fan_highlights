@@ -10,10 +10,8 @@ class UserCreate(BaseModel):
     fav_team: str
 
 class UserOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
+    id: str
     email: EmailStr
-    created_at: datetime
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -24,7 +22,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    id: Optional[int]
+    id: Optional[str]
 
 class ArticleIn(BaseModel):
     title: str
@@ -33,9 +31,23 @@ class ArticleIn(BaseModel):
     conclusion: str
     created_at: Optional[datetime] = Field(default=None)
 
+class ArticlePost(BaseModel):
+    title: str
+    sections: List[Dict[str, str]]  # Same as the Article model
+    links: List[Dict[str, str]]  # Same as the Article model
+    conclusion: str
+    created_at: Optional[datetime] = Field(default=None)
+    game_date: str
+    team_home: str
+    team_away: str
+
+
 class ArticleOut(BaseModel):
     _id: ObjectId
     title: str
     sections: List[Dict[str, str]]  # Same as the Article model
     links: List[Dict[str, str]]  # Same as the Article model
     conclusion: str
+    game_date: str
+    team_home: str
+    team_away: str

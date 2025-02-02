@@ -76,9 +76,10 @@ async def poll_schedule():
     previous_data = await fetch_schedule()
     while True:
         schedule_data = await fetch_schedule()
+        schedule_data['new'] = 'new data'
         if schedule_data != previous_data:
             print("New updates detected!")
-            generate.generate_summary("JAPANESE")
+            generate.generate_summary("ENGLISH")
             
             # Process the new schedule_data here
             previous_data = schedule_data

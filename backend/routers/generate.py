@@ -138,11 +138,11 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         date_only = date_obj.date()  # Extract only the date part
         json_data['game_date'] = date_only.isoformat()
 
+        json_data['team_home'] = game_data['gameData']['teams']['home']['name']
+        json_data['team_away'] = game_data['gameData']['teams']['away']['name']
 
-        print(game_data)
-
+        print(json_data)
         collection.insert_one(json_data)
-        print("Data Inserted")
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
             # print("Invalid JSON structure:", formatted_text)
             return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)
@@ -157,4 +157,3 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         return JSONResponse(content={"error": "AI model failed to generate content."}, status_code=500)
 
     return JSONResponse(content=parsed_json)
-

@@ -7,15 +7,29 @@ from pydantic import BaseModel, Field
 from typing import List, Dict
 from datetime import datetime
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, nullable=False)
-    email = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
-    fav_team = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+# class User(Base):
+#     __tablename__ = "users"
+#     id = Column(Integer, primary_key=True, nullable=False)
+#     email = Column(String, nullable=False, unique=True)
+#     password = Column(String, nullable=False)
+#     fav_team = Column(String, nullable=False)
+#     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
+from pydantic import BaseModel, EmailStr
+from bson import ObjectId
+
+class User(BaseModel):
+    id: str | None = None
+    email: EmailStr
+    password: str
+    fav_team: str
+
+    class Config:
+        from_attributes = True
+
+class UserInDB(User):
+    hashed_password: str
 
 
 # Main model for MongoDB documents
