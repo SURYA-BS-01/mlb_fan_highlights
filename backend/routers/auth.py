@@ -43,6 +43,7 @@ router = APIRouter(
 
 @router.post("/login", response_model=schemas.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db = Depends(database.get_db)):
+    print(user_credentials.username, user_credentials.password)
 
     user = db.users_collection.find_one({"email": user_credentials.username})
     

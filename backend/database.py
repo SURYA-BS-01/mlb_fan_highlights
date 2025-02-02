@@ -31,6 +31,7 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 db = client.mlb_articles
 collection = db['articles']
 users_collection = db['users']  # Collection for storing users
+user_articles = db['user_articles']
 
 def get_db():
     return db  # Return the MongoDB database instance

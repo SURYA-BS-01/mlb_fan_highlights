@@ -66,6 +66,7 @@ import Form from "./components/Form";
 import Article from "./components/Article";
 import FilteredArticles from "./components/FilteredArticles";
 import CreateArticle from "./components/CreateArticle";
+import Dashboard from "./components/Dashboard";
 
 const UnauthenticatedRoutes = ({ setIsAuthenticated }) => (
   <Routes>
@@ -78,6 +79,7 @@ const UnauthenticatedRoutes = ({ setIsAuthenticated }) => (
 const AuthenticatedRoutes = ({ setArticle, article }) => (
   <Routes>
     <Route path="/" element={<Home />} />
+    <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/createarticle" element={<CreateArticle />} />
     <Route path="/form" element={<Form setArticle={setArticle} />} />
     <Route path="/article/:id" element={<Article />} />

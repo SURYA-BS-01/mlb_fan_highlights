@@ -211,7 +211,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, LogOut, Plus, Loader2, Filter } from "lucide-react";
+import { Sparkles, LogOut, Plus, Loader2, Filter, User } from "lucide-react";
+import { source } from "framer-motion/client";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -253,7 +254,14 @@ const Home = () => {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-10"></div>
         <div className="container mx-auto px-4 py-16">
-          <nav className="flex justify-end mb-16">
+        <nav className="flex justify-between mb-16">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all duration-300"
+            >
+              <User size={18} />
+              <span>Profile</span>
+            </button>
             <button
               onClick={handleLogout}
               className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all duration-300"
@@ -328,7 +336,7 @@ const Home = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.1 }}
-        onClick={() => navigate(`/article/${article._id}`)}
+        onClick={() => navigate(`/article/${article._id}`, {state: {source: 'latest'}})}
         className="group relative bg-gray-800/50 rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 cursor-pointer border border-gray-700/50 hover:border-blue-500/50"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300"></div>

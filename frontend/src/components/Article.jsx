@@ -349,7 +349,7 @@
 
 import "../App.css";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const apiKey = import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY;
@@ -363,11 +363,16 @@ const Article = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("en"); // Default: English
   const [audioUrls, setAudioUrls] = useState({}); // Store audio URLs for different languages
 
+  const location = useLocation(); // If using state
+  const [searchParams] = useSearchParams(); // If using query parameters
+  const source = location.state?.source || searchParams.get("source") || "latest"; 
+  const collection = source === "user" ? "user" : "latest"; // Change collection name
+
   useEffect(() => {
     const fetchArticle = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://127.0.0.1:8000/article/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8000/article/${id}?collection=${collection}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

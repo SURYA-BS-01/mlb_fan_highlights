@@ -51,3 +51,7 @@ class ArticleOut(BaseModel):
     game_date: str
     team_home: str
     team_away: str
+
+class UserArticle(BaseModel):
+    id: str
+    article: ArticlePost

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
-from ..schemas import ArticleIn, ArticleOut, ArticlePost
+from ..schemas import ArticleIn, ArticleOut, ArticlePost, UserArticle
 from .. import oauth
-from ..database import collection
+from ..database import collection, get_db
 from bson import ObjectId
 from typing import List, Dict
 from fastapi.responses import JSONResponse
@@ -21,8 +21,9 @@ async def create_task(new_article: ArticlePost, current_user: int = Depends(oaut
     # Insert the article into the MongoDB collection
     new_article.game_date = datetime.strptime(new_article.game_date, "%Y-%m-%d").isoformat()
     new_article.created_at = datetime.utcnow()
-    print(new_article)
-    resp = collection.insert_one(new_article.model_dump())
+    db = get_db()
+    article_data = {"id": current_user["id"], **new_article.model_dump()}
+    resp = db.user_articles.insert_one(article_data)
 
     return {
         **new_article.model_dump(),
@@ -44,6 +45,7 @@ from pymongo import DESCENDING
 @router.get("/latest", response_model=List[Dict])
 async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
+    print(current_user)
     articles = list(collection.find().sort("_id", DESCENDING).limit(5))
     # Convert ObjectId to string for JSON serialization
     # articles = [{**article, "_id": str(article["_id"])} for article in articles]
@@ -53,22 +55,20 @@ async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
         for article in articles
     ]
 
-    print(articles)
     return articles
 
 @router.get("/user_articles", response_model=List[Dict])
 async def get_user_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
-    articles = list(collection.find().sort("_id", DESCENDING))
+    db = get_db()
+    articles = list(db.user_articles.find())
     # Convert ObjectId to string for JSON serialization
     # articles = [{**article, "_id": str(article["_id"])} for article in articles]
     articles = [
-        {key: value for key, value in article.items() if key not in ("created_at")}
+        {key: value for key, value in article.items() if key not in ("created_at", "id")}
         | {"_id": str(article["_id"])}
         for article in articles
     ]
-
-    print(articles)
     return articles
 
 # @router.get("/filter", response_model=List[Dict]) 
@@ -133,14 +133,16 @@ async def get_filtered_articles(
     return articles
 
 
-
-
-
 @router.get("/{id}", response_model=ArticleOut)
-async def get_article(id: str, current_user: int = Depends(oauth.get_current_user)):
+async def get_article(id: str, collection: str = Query(...), current_user: int = Depends(oauth.get_current_user)):
+    
+    db = get_db()
     try:
         # Ensure the ID is valid
-        article = collection.find_one({"_id": ObjectId(id)})
+        if collection == 'user':
+            article = db.user_articles.find_one({"_id": ObjectId(id)})
+        else:
+            article = db.articles.find_one({"_id": ObjectId(id)})
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid article ID")
 
@@ -151,3 +153,4 @@ async def get_article(id: str, current_user: int = Depends(oauth.get_current_use
     article = {key: value for key, value in article.items() if key not in ("created_at")}
     article['_id'] = str(article['_id'])
     return article  # Return dict directly instead of JSONResponse
+
