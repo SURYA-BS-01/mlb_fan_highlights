@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { source } from "framer-motion/client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -43,7 +42,8 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    console.log("Token removed");
+    window.location.reload();
   };
 
   return (
@@ -53,8 +53,12 @@ const Dashboard = () => {
           <User className="w-6 h-6" />
           <span>Dashboard</span>
         </div>
-        <button onClick={handleLogout} className="flex items-center gap-2 bg-red-500 px-4 py-2 rounded">
-          <LogOut className="w-4 h-4" /> Logout
+        <button
+          onClick={handleLogout}
+          className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all duration-300"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
         </button>
       </nav>
 

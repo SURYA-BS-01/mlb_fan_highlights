@@ -6,39 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers import user, auth, article, generate
 from .routers import generate
 
-import time
-
-import psycopg2
-from psycopg2.extras import RealDictCursor
-
-from . import models
 from .models import *
-from .database import engine, sessionLocal
 
 # Initialize FastAPI app
 app = FastAPI()
-
-models.Base.metadata.create_all(bind=engine)
-
-
-def get_db():
-    db = sessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='alpha1234', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print("Database connection was successfull")
-        break
-    except Exception as error:
-        print("Database connection failed")
-        print("Error: ", error)
-        time.sleep(2)
 
 app.add_middleware(
     CORSMiddleware,
