@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 

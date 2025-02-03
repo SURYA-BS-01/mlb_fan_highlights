@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
-const apiKey = import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY;
-const ttsApiKey = import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY;
+const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
 const Article = () => {
   const { id } = useParams();
@@ -114,7 +113,7 @@ const Article = () => {
     }
 
     const textToConvert = translatedArticle.sections.map((sec) => sec.content).join(" ");
-    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${ttsApiKey}`;
+    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
     const voiceConfig = {
       en: { languageCode: "en-US", voice: "en-US-Wavenet-D" },
       es: { languageCode: "es-ES", voice: "es-ES-Wavenet-D" },
