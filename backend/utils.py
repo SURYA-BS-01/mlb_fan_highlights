@@ -110,10 +110,9 @@ def send_welcome_email(receiver):
 
 
     message.attach(MIMEText(email_body, "html"))
-
     # Send Email
     try:
-        response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key=3935bd98369b48ee99ccb3577b7b4213&email={receiver_email}")
+        response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key={EMAIL_VERIFICATION_API_KEY}&email={receiver_email}")
         content = json.loads(response.content)
         print(type(receiver_email), receiver_email)
         print(response.content)
