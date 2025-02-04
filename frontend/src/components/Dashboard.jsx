@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Loader2 } from "lucide-react";
+import { LogOut, User, Loader2, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Dashboard = () => {
@@ -13,6 +13,7 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
+          
           navigate("/login");
           return;
         }
@@ -101,7 +102,7 @@ const Dashboard = () => {
     <div className="col-span-full text-center py-20">
       <p className="text-gray-400 text-lg mb-4">No highlights available yet</p>
       <button
-        onClick={() => navigate("/form")}
+        onClick={() => navigate("/createarticle")}
         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500/20 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all duration-300"
       >
         <Plus className="w-5 h-5" />

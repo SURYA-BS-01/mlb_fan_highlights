@@ -3,6 +3,7 @@ from .. import schemas, database
 from .password_utils import hash
 from bson import ObjectId
 from datetime import datetime
+from ..utils import send_welcome_email
 
 router = APIRouter(
     prefix="/users",
@@ -10,10 +11,18 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
-def create_user(user: schemas.UserCreate, db = Depends(database.get_db)):
+async def create_user(user: schemas.UserCreate, db = Depends(database.get_db)):
+
+    try:
+        print(user.email)
+        send_welcome_email(user.email)
+    except Exception as e:
+        print("Error")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not valid")
 
     # Check if user already exists
     if db.users_collection.find_one({"email": user.email}):
+        print("error")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     
     hashed_password = hash(user.password)

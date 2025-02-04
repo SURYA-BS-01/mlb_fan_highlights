@@ -45,7 +45,6 @@ from pymongo import DESCENDING
 async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
     articles = list(collection.find().sort("_id", DESCENDING).limit(5))
-
     articles = [
         {key: value for key, value in article.items() if key not in ("created_at")}
         | {"_id": str(article["_id"])}
@@ -58,7 +57,7 @@ async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
 async def get_user_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
     db = get_db()
-    articles = list(db.user_articles.find())
+    articles = list(db.user_articles.find({"id": current_user['id']}))
     articles = [
         {key: value for key, value in article.items() if key not in ("created_at", "id")}
         | {"_id": str(article["_id"])}
@@ -93,7 +92,6 @@ async def get_filtered_articles(
     articles = list(collection.find(query))
     for article in articles:
         article["_id"] = str(article["_id"])
-    
 
     return articles
 

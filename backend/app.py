@@ -30,7 +30,6 @@ app.include_router(auth.router)
 app.include_router(article.router)
 app.include_router(generate.router)
 
-
 # Setup templates directory for HTML rendering
 templates = Jinja2Templates(directory="templates")
 
@@ -48,24 +47,14 @@ async def fetch_schedule():
         async with session.get(url) as response:
             data = await response.json()
             return data
-        
 
-import aiosmtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
-async def send_email(receiver_emails, game_data, url):
-    sender_email = "22csec61@gmail.com"
-    password = "ccxe yzlf jfaj ukwl"  # Use environment variables in production!
-
-    smtp_server = "smtp.gmail.com"
-    port = 587
-    print(game_data.keys())
-
+# Email sending function
+async def send_email(recipient, game_data, url, sender_email, password, smtp_server, port):
+    """Send email to a single recipient asynchronously."""
     message = MIMEMultipart()
     message["From"] = sender_email
+    message["To"] = recipient
     message["Subject"] = f"New Game Recap: {game_data['title']}"
-    message["To"] = ", ".join(receiver_emails)  # Add recipient emails in the header
 
     email_body = f"""
     <html>
@@ -79,14 +68,13 @@ async def send_email(receiver_emails, game_data, url):
     </body>
     </html>
     """
-
     message.attach(MIMEText(email_body, "html"))
 
     try:
         await aiosmtplib.send(
             message.as_string(),
-            sender=sender_email,  # Explicitly pass the sender
-            recipients=receiver_emails,  # Explicitly pass recipients
+            sender=sender_email,
+            recipients=[recipient],  # Send to a single recipient at a time
             hostname=smtp_server,
             port=port,
             username=sender_email,
@@ -94,17 +82,32 @@ async def send_email(receiver_emails, game_data, url):
             use_tls=False,
             start_tls=True
         )
-        print(f"Emails sent successfully to {', '.join(receiver_emails)}")
+        print(f"Email sent successfully to {recipient}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email to {recipient}: {e}")
 
+async def send_bulk_emails(receiver_emails, game_data, url):
+    """Send emails to all users concurrently."""
+    sender_email = "mlbggle@gmail.com"
+    password = "wovv tzjo rnpa vuec"  # Store this securely in env variables
+    smtp_server = "smtp.gmail.com"
+    port = 587
 
+    # Create a list of email sending tasks
+    tasks = [
+        send_email(email, game_data, url, sender_email, password, smtp_server, port) 
+        for email in receiver_emails
+    ]
 
+    # Run all tasks concurrently
+    await asyncio.gather(*tasks)
+
+# Polling function
 async def poll_schedule():
     previous_data = await fetch_schedule()
     while True:
         schedule_data = await fetch_schedule()
-        schedule_data['new'] = 'new data'
+        # schedule_data['new'] = 'new data'
         if schedule_data != previous_data:
             print("New updates detected!")
 
@@ -112,21 +115,19 @@ async def poll_schedule():
             json_data = json.loads(json_data.body)
             data = json_data['data']
             id = json_data['id']
-            print(data.keys())
             db = get_db()
             users_collection = db.users_collection
 
-            # # Fetch all user emails from MongoDB
+            # Fetch all user emails from MongoDB
             user_emails = [user["email"] for user in users_collection.find({}, {"email": 1})]
-            print(list(user_emails))
-            # # Send email alerts asynchronously
+
+            # Send email alerts asynchronously
             if user_emails:
-                await send_email(user_emails, data, f"http://localhost:5173/article/{id}")
+                await send_bulk_emails(user_emails, data, f"http://localhost:5173/article/{id}")
 
             previous_data = schedule_data
         
         await asyncio.sleep(12)
-
 
 @app.on_event("startup")
 async def startup_event():

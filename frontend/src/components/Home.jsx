@@ -66,8 +66,8 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text">
-                Game Highlights Generator
+              <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 py-1 to-purple-400 text-transparent bg-clip-text">
+                Major League Baseball
               </h1>
               <p className="text-gray-300 text-xl mb-8">
                 Transform your gaming moments into captivating highlights with AI-powered analysis
@@ -94,7 +94,7 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl font-bold mb-6 text-blue-400">
-              Discover Your Favorite Articles
+              Discover Your Favorite Matches
             </h2>
             <p className="text-gray-300 text-lg mb-8">
               Browse through a curated list of articles and find the ones that inspire you.
@@ -150,7 +150,7 @@ const Home = () => {
     <div className="col-span-full text-center py-20">
       <p className="text-gray-400 text-lg mb-4">No highlights available yet</p>
       <button
-        onClick={() => navigate("/form")}
+        onClick={() => navigate("/createarticle")}
         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500/20 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all duration-300"
       >
         <Plus className="w-5 h-5" />

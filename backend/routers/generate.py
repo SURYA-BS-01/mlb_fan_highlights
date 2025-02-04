@@ -158,7 +158,6 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         return JSONResponse(content={"error": "AI model failed to generate content."}, status_code=500)
     
     json_data = {key: value for key, value in json_data.items() if key not in ("_id", "created_at")}
-    print(json_data.keys())
 
     return JSONResponse(content={'data': json_data, 'id': str(resp.inserted_id)})
 
