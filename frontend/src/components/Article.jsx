@@ -22,7 +22,7 @@ const Article = () => {
     const fetchArticle = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://127.0.0.1:8000/article/${id}?collection=${collection}`, {
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/${id}?collection=${collection}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

@@ -37,12 +37,11 @@ app.include_router(article.router)
 app.include_router(generate.router)
 
 # Setup templates directory for HTML rendering
-templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return {"Hello": "World"}
 
 import asyncio
 import aiohttp
@@ -129,7 +128,7 @@ async def poll_schedule():
 
             # Send email alerts asynchronously
             if user_emails:
-                await send_bulk_emails(user_emails, data, f"http://localhost:5173/article/{id}")
+                await send_bulk_emails(user_emails, data, f"{FRONTEND_URL}/article/{id}")
 
             previous_data = schedule_data
         
