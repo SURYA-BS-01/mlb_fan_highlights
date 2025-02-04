@@ -3,6 +3,11 @@ import json
 import pandas as pd
 from fastapi.exceptions import HTTPException
 from fastapi import status
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+EMAIL_VERIFICATION_API_KEY = os.getenv("EMAIL_VERIFICATION_API_KEY")
 
 def load_newline_delimited_json(url):
     """Loads a newline-delimited JSON file from a URL into a pandas DataFrame.
@@ -63,7 +68,7 @@ def send_welcome_email(receiver):
 
     # Email Configuration
     sender_email = "mlbggle@gmail.com"
-    receiver_email = receiver
+    receiver_email = str(receiver)
     password = "wovv tzjo rnpa vuec"
 
     # SMTP Server Settings
@@ -108,8 +113,10 @@ def send_welcome_email(receiver):
 
     # Send Email
     try:
-        response = requests.get("https://emailvalidation.abstractapi.com/v1/?api_key=3935bd98369b48ee99ccb3577b7b4213&email=22csec61@gmail.com")
+        response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key=3935bd98369b48ee99ccb3577b7b4213&email={receiver_email}")
         content = json.loads(response.content)
+        print(type(receiver_email), receiver_email)
+        print(response.content)
         if content['deliverability'] != 'DELIVERABLE':
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not valid")
         server = smtplib.SMTP(smtp_server, port)
