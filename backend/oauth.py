@@ -42,3 +42,4 @@ def get_current_user(token: str = Depends(oauth2_scheme), db = Depends(database.
         raise credentials_exception
     
     return {"id": str(user["_id"]), "email": user["email"]}
+

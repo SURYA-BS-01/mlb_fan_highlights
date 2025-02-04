@@ -44,7 +44,6 @@ from pymongo import DESCENDING
 @router.get("/latest", response_model=List[Dict])
 async def get_all_articles(current_user: int = Depends(oauth.get_current_user)):
     # Fetch the last 5 articles sorted by creation time in descending order
-    print(current_user)
     articles = list(collection.find().sort("_id", DESCENDING).limit(5))
 
     articles = [
@@ -90,20 +89,17 @@ async def get_filtered_articles(
             {"team_away": regex_filter}
         ]
 
-    print("MongoDB Query:", query)  # Debugging line
 
     articles = list(collection.find(query))
     for article in articles:
         article["_id"] = str(article["_id"])
     
-    print(articles)  # Debugging line
 
     return articles
 
 
 @router.get("/{id}", response_model=ArticleOut)
 async def get_article(id: str, collection: str = Query(...), current_user: int = Depends(oauth.get_current_user)):
-    
     db = get_db()
     try:
         # Ensure the ID is valid

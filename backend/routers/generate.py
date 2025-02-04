@@ -14,6 +14,9 @@ import re
 from ..models import *
 from ..database import collection
 
+
+
+
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
@@ -45,8 +48,6 @@ def reformat_text(text):
     extracted_json = re.sub(r"\*.*?\*", "", extracted_json)  # Remove asterisks
     extracted_json = extracted_json.strip()
     return extracted_json
-
-
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def generate(request: Request, current_user: int = Depends(oauth.get_current_user)):
@@ -140,8 +141,9 @@ The goal is to create a summary that feels like a conversation among fans, celeb
         json_data['team_home'] = game_data['gameData']['teams']['home']['name']
         json_data['team_away'] = game_data['gameData']['teams']['away']['name']
 
-        print(json_data)
-        collection.insert_one(json_data)
+        resp = collection.insert_one(json_data)
+        url = f"http://localhost:5173/article/{resp.inserted_id}"
+
         if not formatted_text.startswith("{") or not formatted_text.endswith("}"):
             # print("Invalid JSON structure:", formatted_text)
             return JSONResponse(content={"error": "Generated content is not valid JSON."}, status_code=500)
@@ -154,5 +156,10 @@ The goal is to create a summary that feels like a conversation among fans, celeb
     except Exception as e:
         print("Error during text generation:", e)
         return JSONResponse(content={"error": "AI model failed to generate content."}, status_code=500)
+    
+    json_data = {key: value for key, value in json_data.items() if key not in ("_id", "created_at")}
+    print(json_data.keys())
 
-    return JSONResponse(content=parsed_json)
+    return JSONResponse(content={'data': json_data, 'id': str(resp.inserted_id)})
+
+

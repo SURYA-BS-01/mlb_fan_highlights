@@ -7,6 +7,12 @@ from .routers import user, auth, article, generate
 from .routers import generate
 
 from .models import *
+import json
+import aiosmtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from .database import get_db
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -42,19 +48,85 @@ async def fetch_schedule():
         async with session.get(url) as response:
             data = await response.json()
             return data
+        
+
+import aiosmtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+async def send_email(receiver_emails, game_data, url):
+    sender_email = "22csec61@gmail.com"
+    password = "ccxe yzlf jfaj ukwl"  # Use environment variables in production!
+
+    smtp_server = "smtp.gmail.com"
+    port = 587
+    print(game_data.keys())
+
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["Subject"] = f"New Game Recap: {game_data['title']}"
+    message["To"] = ", ".join(receiver_emails)  # Add recipient emails in the header
+
+    email_body = f"""
+    <html>
+    <body>
+        <h2>{game_data['title']}</h2>
+        <p><strong>Game Date:</strong> {game_data['game_date']}</p>
+        <p><strong>Teams:</strong> {game_data['team_away']} vs. {game_data['team_home']}</p>
+        <hr>    
+        <h3>Game Highlights</h3>
+        <p> Read more about the game here: {url}</p>
+    </body>
+    </html>
+    """
+
+    message.attach(MIMEText(email_body, "html"))
+
+    try:
+        await aiosmtplib.send(
+            message.as_string(),
+            sender=sender_email,  # Explicitly pass the sender
+            recipients=receiver_emails,  # Explicitly pass recipients
+            hostname=smtp_server,
+            port=port,
+            username=sender_email,
+            password=password,
+            use_tls=False,
+            start_tls=True
+        )
+        print(f"Emails sent successfully to {', '.join(receiver_emails)}")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+
 
 async def poll_schedule():
     previous_data = await fetch_schedule()
     while True:
         schedule_data = await fetch_schedule()
-        # schedule_data['new'] = 'new data'
+        schedule_data['new'] = 'new data'
         if schedule_data != previous_data:
             print("New updates detected!")
-            generate.generate_summary("ENGLISH")
-            
-            # Process the new schedule_data here
+
+            json_data = generate.generate_summary("ENGLISH")
+            json_data = json.loads(json_data.body)
+            data = json_data['data']
+            id = json_data['id']
+            print(data.keys())
+            db = get_db()
+            users_collection = db.users_collection
+
+            # # Fetch all user emails from MongoDB
+            user_emails = [user["email"] for user in users_collection.find({}, {"email": 1})]
+            print(list(user_emails))
+            # # Send email alerts asynchronously
+            if user_emails:
+                await send_email(user_emails, data, f"http://localhost:5173/article/{id}")
+
             previous_data = schedule_data
-        await asyncio.sleep(12)  # Avoid blocking with  async sleep
+        
+        await asyncio.sleep(12)
+
 
 @app.on_event("startup")
 async def startup_event():
