@@ -29,7 +29,7 @@ const FilteredArticles = () => {
   
       console.log("Query Params:", queryParams.toString());
   
-      const response = await fetch(`http://127.0.0.1:8000/article/filter?${queryParams.toString()}`, {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/article/filter?${queryParams.toString()}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

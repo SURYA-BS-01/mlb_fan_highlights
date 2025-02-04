@@ -18,7 +18,7 @@ const Dashboard = () => {
           return;
         }
         
-        const response = await fetch("http://127.0.0.1:8000/article/user_articles", {
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/article/user_articles`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

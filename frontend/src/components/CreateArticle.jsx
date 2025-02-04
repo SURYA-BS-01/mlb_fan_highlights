@@ -72,7 +72,7 @@ const CreateArticle = () => {
 
         console.log(payload);
 
-        await axios.post("http://127.0.0.1:8000/article", payload, {
+        await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/article`, payload, {
             headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         });
 

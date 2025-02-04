@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/article/latest", {
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/article/latest`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

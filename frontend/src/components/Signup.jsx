@@ -203,14 +203,14 @@ const Signup = ({ setIsAuthenticated }) => {
     setLoading(true);
 
     try {
-      await axios.post("http://127.0.0.1:8000/users", {
+      await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users`, {
         email,
         password,
         fav_team: favTeam,
       });
 
       const loginResponse = await axios.post(
-        "http://127.0.0.1:8000/login",
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/login`,
         new URLSearchParams({
           username: email,
           password,

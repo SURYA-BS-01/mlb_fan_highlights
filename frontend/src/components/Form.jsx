@@ -14,7 +14,7 @@ const Form = ({ setArticle }) => {
   const token = localStorage.getItem("token"); // Ensure the token is stored in local storage after login
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/generate",
+      `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/generate`,
       { language },
       {
         headers: {

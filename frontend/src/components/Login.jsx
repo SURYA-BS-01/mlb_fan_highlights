@@ -17,7 +17,7 @@ const Login = ({ setIsAuthenticated }) => {
     payload.append("password", password);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/login", payload, {
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/login`, payload, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
