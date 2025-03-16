@@ -13,7 +13,7 @@ class DataIngestion:
         return game_data
 
     def latest_completed_game(self):
-        schedule_endpoint_url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2024'
+        schedule_endpoint_url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2025'
         
         # Fetch schedule data
         schedule_dates = process_endpoint_url(schedule_endpoint_url, "dates")
