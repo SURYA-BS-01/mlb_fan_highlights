@@ -26,12 +26,12 @@ class DataIngestion:
         date_columns = [
             "gameDate",
             "officialDate",
-            "rescheduleDate",
-            "rescheduleGameDate",
-            "rescheduledFromDate",
-            "resumeDate",
-            "resumeGameDate",
-            "resumedFromDate"
+            # "rescheduleDate",
+            # "rescheduleGameDate",
+            # "rescheduledFromDate",
+            # "resumeDate",
+            # "resumeGameDate",
+            # "resumedFromDate"
         ]
 
         # Convert the specified columns to datetime
